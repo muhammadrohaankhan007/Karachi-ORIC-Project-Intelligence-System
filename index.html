@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Karachi Industry–University Project Intelligence System | ORIC Commercialization Portal</title>
+  <meta name="description" content="AI-ready institutional intelligence platform analyzing university semester projects for industrial relevance, commercialization, and startup potential in Karachi, Sindh, Pakistan." />
+  <meta name="keywords" content="Karachi, ORIC, University Projects, Industrial Commercialization, Sindh, Higher Education, Pakistan, Startups, Technology Transfer" />
+
+  <!-- Google Fonts: Inter & Outfit -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
+  <!-- SheetJS (xlsx) for full Excel import/export -->
+  <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+  <!-- Chart.js 4 for interactive dashboards -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+
+  <!-- Application Stylesheet -->
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+
+  <div class="app-layout">
+    <!-- =========================================================================
+         SIDEBAR NAVIGATION
+         ========================================================================= -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div class="app-logo-badge">K</div>
+        <div class="app-title-wrap">
+          <h1>Karachi ORIC</h1>
+          <p>Project Intelligence System</p>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <div class="nav-section-title">Core Intelligence</div>
+        <a class="nav-item active" data-tab="dashboard">
+          <span class="nav-icon">&#x1F4CA;</span>
+          <span>Executive Dashboard</span>
+        </a>
+        <a class="nav-item" data-tab="upload">
+          <span class="nav-icon">&#x1F4C1;</span>
+          <span>Upload &amp; Ingest</span>
+        </a>
+        <a class="nav-item" data-tab="portfolio">
+          <span class="nav-icon">&#x1F5C2;</span>
+          <span>Project Portfolio</span>
+          <span class="nav-badge" id="sidebarProjectCount">25</span>
+        </a>
+
+        <div class="nav-section-title">Analysis &amp; Matching</div>
+        <a class="nav-item" data-tab="specializations">
+          <span class="nav-icon">&#x1F52C;</span>
+          <span>Specialization Analysis</span>
+        </a>
+        <a class="nav-item" data-tab="industry">
+          <span class="nav-icon">&#x1F3ED;</span>
+          <span>Karachi Industry Matrix</span>
+        </a>
+        <a class="nav-item" data-tab="oric">
+          <span class="nav-icon">&#x1F680;</span>
+          <span>ORIC Prioritization</span>
+        </a>
+
+        <div class="nav-section-title">Governance &amp; Exports</div>
+        <a class="nav-item" data-tab="reports">
+          <span class="nav-icon">&#x1F4DD;</span>
+          <span>Reports &amp; Downloads</span>
+        </a>
+        <a class="nav-item" data-tab="settings">
+          <span class="nav-icon">&#x2699;</span>
+          <span>Settings &amp; AI Config</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="city-indicator">
+          <span class="city-pulse"></span>
+          <span>Karachi Industrial Ecosystem</span>
+        </div>
+        <div>SITE &bull; Korangi &bull; Port Qasim &bull; Chundrigar</div>
+      </div>
+    </aside>
+
+    <!-- =========================================================================
+         MAIN APPLICATION AREA
+         ========================================================================= -->
+    <div class="main-wrapper">
+      <!-- TOP HEADER -->
+      <header class="top-header">
+        <div class="header-left">
+          <div class="page-title-wrap">
+            <h2 id="headerPageTitle">Executive Dashboard</h2>
+            <p id="headerPageSub">Real-time industrial relevance and commercial potential of university semester projects</p>
+          </div>
+        </div>
+
+        <div class="header-right">
+          <button class="btn btn-secondary btn-sm" id="btnLoadDemoData" title="Load Authentic Karachi University Dataset">
+            <span>&#x21BA;</span> Load Demo Data
+          </button>
+          <button class="btn btn-primary btn-sm" onclick="app.switchTab('upload')">
+            <span>&#x2B06;</span> Upload Excel
+          </button>
+          <button class="theme-toggle-btn" id="themeToggleBtn" title="Toggle Light/Dark Theme">
+            &#x2600;
+          </button>
+        </div>
+      </header>
+
+      <!-- CONTENT BODY (TABS) -->
+      <main class="content-body">
+        
+        <!-- =====================================================================
+             TAB 1: EXECUTIVE DASHBOARD
+             ===================================================================== -->
+        <div class="tab-pane active" id="tab-dashboard">
+          <!-- KPI Metrics Row -->
+          <div class="metrics-row">
+            <div class="metric-card blue">
+              <div class="metric-title">Total Uploaded</div>
+              <div class="metric-value" id="kpiTotalProjects">0</div>
+              <div class="metric-sub">Semester projects in database</div>
+            </div>
+            <div class="metric-card emerald">
+              <div class="metric-title">Analysed Projects</div>
+              <div class="metric-value" id="kpiAnalysedProjects">0</div>
+              <div class="metric-sub">Complete abstract &amp; titles</div>
+            </div>
+            <div class="metric-card purple">
+              <div class="metric-title">High Potential (80+)</div>
+              <div class="metric-value" id="kpiHighPotential">0</div>
+              <div class="metric-sub">Priority validation candidates</div>
+            </div>
+            <div class="metric-card amber">
+              <div class="metric-title">Venture / Startups</div>
+              <div class="metric-value" id="kpiStartups">0</div>
+              <div class="metric-sub">Suitable for incubation</div>
+            </div>
+            <div class="metric-card rose">
+              <div class="metric-title">Industry Collabs</div>
+              <div class="metric-value" id="kpiIndustryCollabs">0</div>
+              <div class="metric-sub">Targeting Karachi factories</div>
+            </div>
+            <div class="metric-card blue">
+              <div class="metric-title">Karachi Sectors</div>
+              <div class="metric-value" id="kpiIndustriesMatched">0</div>
+              <div class="metric-sub">Industrial areas mapped</div>
+            </div>
+          </div>
+
+          <!-- Charts Grid -->
+          <div class="charts-grid">
+            <!-- Chart 1: Project Distribution by Specialization -->
+            <div class="chart-card col-6">
+              <div class="chart-header">
+                <div>
+                  <h3>Project Count by Specialization</h3>
+                  <p>Distribution of submitted projects across technical disciplines</p>
+                </div>
+              </div>
+              <div class="chart-container">
+                <canvas id="chartSpecCount"></canvas>
+              </div>
+            </div>
+
+            <!-- Chart 2: Average Market Potential by Specialization -->
+            <div class="chart-card col-6">
+              <div class="chart-header">
+                <div>
+                  <h3>Average Market Potential Score</h3>
+                  <p>Weighted 7-criteria commercialization readiness (/100)</p>
+                </div>
+              </div>
+              <div class="chart-container">
+                <canvas id="chartSpecScore"></canvas>
+              </div>
+            </div>
+
+            <!-- Chart 3: Distribution across Karachi Industry Sectors -->
+            <div class="chart-card col-8">
+              <div class="chart-header">
+                <div>
+                  <h3>Karachi Industry Sector Matches</h3>
+                  <p>Volume of university solutions addressing real Karachi industrial sectors</p>
+                </div>
+              </div>
+              <div class="chart-container tall">
+                <canvas id="chartIndustryDist"></canvas>
+              </div>
+            </div>
+
+            <!-- Chart 4: Projects by Market Potential Tier -->
+            <div class="chart-card col-4">
+              <div class="chart-header">
+                <div>
+                  <h3>Market Potential Tiers</h3>
+                  <p>Prioritization breakdown</p>
+                </div>
+              </div>
+              <div class="chart-container tall">
+                <canvas id="chartPotentialTier"></canvas>
+              </div>
+            </div>
+
+            <!-- Chart 5: Top Commercialization Candidates -->
+            <div class="chart-card col-12">
+              <div class="chart-header">
+                <div>
+                  <h3>Top Commercialization Candidates (Ranked by Market Potential)</h3>
+                  <p>High-scoring projects prioritized for ORIC industry pilots, licensing, and venture seed funding</p>
+                </div>
+                <button class="btn btn-secondary btn-sm" onclick="app.switchTab('portfolio')">
+                  View Full Portfolio &rarr;
+                </button>
+              </div>
+              <div class="chart-container">
+                <canvas id="chartTopRanked"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- =====================================================================
+             TAB 2: UPLOAD & INGEST MODULE
+             ===================================================================== -->
+        <div class="tab-pane" id="tab-upload">
+          <div class="upload-hero">
+            <h2 style="font-family: var(--font-display); font-size: 22px; font-weight: 700; margin-bottom: 8px;">
+              Semester Project Excel File Ingestion
+            </h2>
+            <p style="font-size: 13.5px; color: var(--text-secondary); margin-bottom: 24px; max-width: 720px;">
+              Upload Excel spreadsheets (.xlsx, .xls) or CSV files containing student semester projects assigned by university faculty. 
+              The system automatically parses titles, abstracts, departments, performs validation, detects duplicates, and runs client-side analysis.
+            </p>
+
+            <div class="dropzone-box" id="excelDropzone">
+              <div class="dropzone-icon">&#x1F4E5;</div>
+              <div class="dropzone-title">Drag &amp; Drop Excel / CSV File Here</div>
+              <div class="dropzone-desc">Supports .xlsx, .xls, and .csv format. Processing occurs locally in your browser for complete data privacy.</div>
+              <div class="upload-actions">
+                <label class="btn btn-primary" style="cursor: pointer;">
+                  Browse Computer
+                  <input type="file" id="excelFileInput" accept=".xlsx,.xls,.csv" style="display: none;" />
+                </label>
+                <button class="btn btn-secondary" id="btnDownloadTemplate">
+                  &#x1F4E5; Download Excel Template
+                </button>
+                <button class="btn btn-success" id="btnLoadDemoData">
+                  &#x26A1; Load Karachi Demo Dataset
+                </button>
+              </div>
+            </div>
+
+            <!-- Ingestion Statistics Ribbon -->
+            <div class="upload-stats-ribbon">
+              <div class="stat-pill">
+                <span class="stat-pill-label">Total Uploaded</span>
+                <span class="stat-pill-val" id="statTotalUploaded">0</span>
+              </div>
+              <div class="stat-pill">
+                <span class="stat-pill-label">Valid Records</span>
+                <span class="stat-pill-val" style="color: #34d399;" id="statValidRecords">0</span>
+              </div>
+              <div class="stat-pill">
+                <span class="stat-pill-label">Flagged / Incomplete</span>
+                <span class="stat-pill-val" style="color: #fbbf24;" id="statFlaggedRecords">0</span>
+              </div>
+              <div class="stat-pill">
+                <span class="stat-pill-label">Duplicates Identified</span>
+                <span class="stat-pill-val" style="color: #f87171;" id="statDuplicateRecords">0</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Expected Schema & Data Privacy Card -->
+          <div class="detail-section">
+            <div class="detail-section-title">
+              <span>&#x1F6E1;</span> Expected Column Structure &amp; Data Privacy Policy
+            </div>
+            <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.6; margin-bottom: 12px;">
+              <strong>Expected Columns:</strong> Faculty Name &bull; Department / Faculty &bull; Student Name &bull; Student Registration Number (optional) &bull; Student Class / Semester &bull; Course Code &bull; Project Title &bull; Project Abstract &bull; Supervisor Name (optional) &bull; Existing Category (optional).
+            </p>
+            <p style="font-size: 12px; color: var(--text-muted); line-height: 1.5;">
+              <strong>Data Privacy:</strong> Student registration numbers or unnecessary confidential personal details are never required for market analysis. All file analysis runs entirely client-side within browser memory; data is never transmitted to external servers without administrative authorization.
+            </p>
+          </div>
+        </div>
+
+        <!-- =====================================================================
+             TAB 3: PROJECT PORTFOLIO
+             ===================================================================== -->
+        <div class="tab-pane" id="tab-portfolio">
+          <!-- Filter & Search Bar -->
+          <div class="filter-bar">
+            <div class="filter-row">
+              <div class="search-input-wrap">
+                <span class="search-icon">&#x1F50D;</span>
+                <input type="text" id="globalSearchInput" class="search-input" placeholder="Search by title, abstract keyword, student, faculty, industry..." />
+              </div>
+
+              <select id="filterSpecialization" class="filter-select" data-label="Specializations">
+                <option value="all">All Specializations</option>
+              </select>
+
+              <select id="filterIndustry" class="filter-select" data-label="Karachi Industries">
+                <option value="all">All Karachi Industries</option>
+              </select>
+
+              <select id="filterTier" class="filter-select">
+                <option value="all">All Potential Tiers</option>
+                <option value="High Potential">High Potential (80-100)</option>
+                <option value="Promising">Promising (65-79)</option>
+                <option value="Development Opportunity">Development Opportunity (50-64)</option>
+                <option value="Early-Stage / Needs Reassessment">Early-Stage (&lt;50)</option>
+              </select>
+
+              <select id="filterPathway" class="filter-select">
+                <option value="all">All Pathways</option>
+                <option value="Develop a Startup / Venture Incubation">Startup Incubation</option>
+                <option value="Seek Industry Collaboration / Corporate Pilot">Industry Collaboration</option>
+                <option value="Technology Licensing to Established Manufacturers">Technology Licensing</option>
+                <option value="Develop a Proof of Concept / Applied R&D">Applied R&amp;D / PoC</option>
+              </select>
+
+              <select id="filterOricStatus" class="filter-select">
+                <option value="all">All ORIC Statuses</option>
+                <option value="Under Review">Under Review</option>
+                <option value="Selected for Validation">Selected for Validation</option>
+                <option value="Prototype Development">Prototype Development</option>
+                <option value="Industry Engagement">Industry Engagement</option>
+                <option value="Incubation Candidate">Incubation Candidate</option>
+                <option value="Commercialization Ready">Commercialization Ready</option>
+                <option value="On Hold">On Hold</option>
+              </select>
+
+              <button class="btn btn-secondary btn-sm" id="btnClearFilters">
+                Reset Filters
+              </button>
+            </div>
+          </div>
+
+          <!-- Table Controls Header -->
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+            <div style="font-size: 13px; color: var(--text-secondary);">
+              Showing <strong id="portfolioMatchCount" style="color: var(--text-primary);">0 Projects</strong>
+            </div>
+            <div style="display: flex; gap: 8px;">
+              <button class="btn btn-secondary btn-sm" id="btnExportCSV">
+                &#x1F4E5; Export CSV
+              </button>
+              <button class="btn btn-primary btn-sm" id="btnExportExcel">
+                &#x1F4CA; Export Full Excel Dossier
+              </button>
+            </div>
+          </div>
+
+          <!-- Main Projects Data Table -->
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th style="min-width: 280px;">Project Title &amp; Submitter</th>
+                  <th>Specialization</th>
+                  <th>Matched Karachi Industry</th>
+                  <th style="width: 100px;">Score</th>
+                  <th>Potential Tier</th>
+                  <th>ORIC Status</th>
+                  <th style="width: 120px;">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="portfolioTableBody">
+                <!-- Dynamically populated -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- =====================================================================
+             TAB 4: SPECIALIZATION-WISE MARKET ANALYSIS
+             ===================================================================== -->
+        <div class="tab-pane" id="tab-specializations">
+          <div style="margin-bottom: 24px;">
+            <h2 style="font-family: var(--font-display); font-size: 22px; font-weight: 700;">
+              Specialization-Wise Market Intelligence &amp; Growth Prospects
+            </h2>
+            <p style="font-size: 13.5px; color: var(--text-secondary); margin-top: 4px;">
+              Aggregated portfolio analysis, market problems, commercialization routes, and 3 to 5-year growth prospects for each technical discipline. Click any card to explore Sections A through D.
+            </p>
+          </div>
+
+          <div class="spec-card-grid" id="specializationCardsContainer">
+            <!-- Dynamically populated -->
+          </div>
+        </div>
+
+        <!-- =====================================================================
+             TAB 5: KARACHI INDUSTRY INTELLIGENCE
+             ===================================================================== -->
+        <div class="tab-pane" id="tab-industry">
+          <div style="margin-bottom: 24px; display: flex; justify-content: space-between; align-items: flex-end;">
+            <div>
+              <h2 style="font-family: var(--font-display); font-size: 22px; font-weight: 700;">
+                Karachi Industrial Intelligence Knowledge Base
+              </h2>
+              <p style="font-size: 13.5px; color: var(--text-secondary); margin-top: 4px;">
+                Verified taxonomy of 18+ key industrial sectors across Karachi: operational problems, anchor companies, and import substitution opportunities.
+              </p>
+            </div>
+            <div class="badge badge-emerald">&#x2714; Verified Karachi Baseline (2026)</div>
+          </div>
+
+          <div class="industry-grid" id="industryCardsContainer">
+            <!-- Dynamically populated -->
+          </div>
+        </div>
+
+        <!-- =====================================================================
+             TAB 6: ORIC COMMERCIALIZATION PRIORITIZATION
+             ===================================================================== -->
+        <div class="tab-pane" id="tab-oric">
+          <div style="margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
+            <div>
+              <h2 style="font-family: var(--font-display); font-size: 22px; font-weight: 700;">
+                ORIC Commercialization Pipeline
+              </h2>
+              <p style="font-size: 13.5px; color: var(--text-secondary); margin-top: 2px;">
+                Institutional pipeline tracking university semester projects from academic evaluation to Karachi industry adoption and startup launch.
+              </p>
+            </div>
+            <button class="btn btn-secondary btn-sm" onclick="app.exportManager.exportToExcel(app.projects)">
+              &#x1F4CA; Export Pipeline Report
+            </button>
+          </div>
+
+          <!-- Kanban Board -->
+          <div class="oric-kanban-board" id="oricKanbanBoard">
+            <!-- Dynamically populated with 7 stages -->
+          </div>
+        </div>
+
+        <!-- =====================================================================
+             TAB 7: REPORTS & DOWNLOADS
+             ===================================================================== -->
+        <div class="tab-pane" id="tab-reports">
+          <div style="margin-bottom: 24px;">
+            <h2 style="font-family: var(--font-display); font-size: 22px; font-weight: 700;">
+              Reports &amp; Intelligence Downloads
+            </h2>
+            <p style="font-size: 13.5px; color: var(--text-secondary); margin-top: 4px;">
+              Generate high-resolution executive dossiers, multi-tab Excel workbooks, and filtered data dumps reflecting actual project analyses.
+            </p>
+          </div>
+
+          <div class="charts-grid">
+            <div class="chart-card col-4">
+              <div style="font-size: 32px; color: #10b981; margin-bottom: 12px;">&#x1F4CA;</div>
+              <h3 style="font-size: 16px; font-weight: 700; margin-bottom: 6px;">Multi-Sheet Excel Workbook</h3>
+              <p style="font-size: 12.5px; color: var(--text-secondary); margin-bottom: 20px; line-height: 1.5;">
+                Generates a 4-sheet workbook: Master Project Analysis, Specialization Summaries, Karachi Industry Mapping, and ORIC Pipeline Shortlist.
+              </p>
+              <button class="btn btn-success" style="width: 100%; margin-top: auto;" id="btnExportExcel">
+                Download Full Excel Report (.xlsx)
+              </button>
+            </div>
+
+            <div class="chart-card col-4">
+              <div style="font-size: 32px; color: #3b82f6; margin-bottom: 12px;">&#x1F4C4;</div>
+              <h3 style="font-size: 16px; font-weight: 700; margin-bottom: 6px;">PDF Executive Dossier</h3>
+              <p style="font-size: 12.5px; color: var(--text-secondary); margin-bottom: 20px; line-height: 1.5;">
+                Print-ready executive summary featuring KPI metrics, top 10 commercialization candidates, and strategic ORIC 30-day action plan.
+              </p>
+              <button class="btn btn-primary" style="width: 100%; margin-top: auto;" id="btnExportPDF">
+                Generate Executive PDF Report
+              </button>
+            </div>
+
+            <div class="chart-card col-4">
+              <div style="font-size: 32px; color: #8b5cf6; margin-bottom: 12px;">&#x1F4E5;</div>
+              <h3 style="font-size: 16px; font-weight: 700; margin-bottom: 6px;">Official Excel Template</h3>
+              <p style="font-size: 12.5px; color: var(--text-secondary); margin-bottom: 20px; line-height: 1.5;">
+                Download the standardized Excel submission template with expected column headers and guidelines for faculty members.
+              </p>
+              <button class="btn btn-secondary" style="width: 100%; margin-top: auto;" id="btnDownloadTemplate">
+                Download Excel Template (.xlsx)
+              </button>
+            </div>
+          </div>
+
+          <!-- Scoring Methodology Card -->
+          <div class="detail-section" style="margin-top: 24px;">
+            <div class="detail-section-title">
+              <span>&#x2699;</span> Transparent 7-Criteria Scoring Model
+            </div>
+            <table class="data-table" style="margin-top: 8px;">
+              <thead>
+                <tr>
+                  <th>Scoring Criterion</th>
+                  <th>Weight</th>
+                  <th>Focus &amp; Evaluation Benchmark</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><strong>Relevance to Karachi Industry Problems</strong></td>
+                  <td>20%</td>
+                  <td>Direct alignment with operational problems in SITE, Korangi, Port Qasim, and Chundrigar Road.</td>
+                </tr>
+                <tr>
+                  <td><strong>Potential Customer Demand</strong></td>
+                  <td>20%</td>
+                  <td>Clear commercial buyer persona, willingness-to-pay, and margin preservation incentive.</td>
+                </tr>
+                <tr>
+                  <td><strong>Commercial Feasibility</strong></td>
+                  <td>15%</td>
+                  <td>Realistic bill-of-materials, software economics, and deployment capex constraints.</td>
+                </tr>
+                <tr>
+                  <td><strong>Competitive Differentiation</strong></td>
+                  <td>15%</td>
+                  <td>Technical novelty distinct from off-the-shelf imports, utilizing local adaptations.</td>
+                </tr>
+                <tr>
+                  <td><strong>Technical Feasibility and Maturity</strong></td>
+                  <td>10%</td>
+                  <td>Documented quantitative bench results, physical fabrication, and TRL progression.</td>
+                </tr>
+                <tr>
+                  <td><strong>Scalability and Growth Potential</strong></td>
+                  <td>10%</td>
+                  <td>Market expansion capability across provincial and international export corridors.</td>
+                </tr>
+                <tr>
+                  <td><strong>Potential for Local Impact / Import Substitution</strong></td>
+                  <td>10%</td>
+                  <td>Directly replacing costly foreign exchange imports or solving acute urban environmental challenges.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- =====================================================================
+             TAB 8: SETTINGS & OPTIONAL AI CONFIGURATION
+             ===================================================================== -->
+        <div class="tab-pane" id="tab-settings">
+          <div style="margin-bottom: 24px;">
+            <h2 style="font-family: var(--font-display); font-size: 22px; font-weight: 700;">
+              System Configuration &amp; Optional AI Layer
+            </h2>
+            <p style="font-size: 13.5px; color: var(--text-secondary); margin-top: 4px;">
+              Customize scoring weights, manage data security, and connect an optional AI API for deep abstract synthesis.
+            </p>
+          </div>
+
+          <div class="charts-grid">
+            <!-- AI Integration Box -->
+            <div class="chart-card col-6">
+              <div class="chart-header">
+                <div>
+                  <h3>Optional AI Reasoning Layer</h3>
+                  <p>Connect Google Gemini or OpenAI for advanced semantic synthesis</p>
+                </div>
+                <span class="badge badge-emerald" id="aiStatusBadge">Local Engine Active</span>
+              </div>
+
+              <div style="font-size: 12.5px; color: var(--text-secondary); margin-bottom: 16px;">
+                The platform functions 100% offline using the built-in Karachi intelligence engine. You can optionally supply an API key to enable deeper abstract extraction. <em>API keys remain strictly in browser session memory and are never exposed or transmitted to external third parties.</em>
+              </div>
+
+              <div style="display: flex; flex-direction: column; gap: 12px;">
+                <div>
+                  <label style="font-size: 11.5px; color: var(--text-muted); display: block; margin-bottom: 4px;">AI Provider:</label>
+                  <select id="settingAiProvider" class="filter-select" style="width: 100%;">
+                    <option value="gemini">Google Gemini (Gemini 1.5 Flash)</option>
+                    <option value="openai">OpenAI (GPT-4o Mini)</option>
+                    <option value="proxy">Secure University Proxy Endpoint</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label style="font-size: 11.5px; color: var(--text-muted); display: block; margin-bottom: 4px;">API Key (Stored locally in browser):</label>
+                  <input type="password" id="settingAiApiKey" class="search-input" placeholder="Paste your API key here..." />
+                </div>
+
+                <div style="display: flex; gap: 10px; margin-top: 8px;">
+                  <button class="btn btn-secondary btn-sm" id="btnTestAiConnection">
+                    Test AI Connection
+                  </button>
+                  <button class="btn btn-primary btn-sm" id="btnSaveAiSettings">
+                    Save AI Settings
+                  </button>
+                </div>
+
+                <div id="aiTestResult" style="font-size: 11.5px; color: var(--text-muted); margin-top: 4px;"></div>
+              </div>
+            </div>
+
+            <!-- Dataset & Storage Management -->
+            <div class="chart-card col-6">
+              <div class="chart-header">
+                <div>
+                  <h3>Data &amp; Memory Management</h3>
+                  <p>Client-side persistence and dataset controls</p>
+                </div>
+              </div>
+
+              <div style="font-size: 12.5px; color: var(--text-secondary); margin-bottom: 16px; line-height: 1.5;">
+                ORIC pipeline statuses and user notes are saved in your browser's local storage. You can purge all project records or reload the verified benchmark dataset at any time.
+              </div>
+
+              <div style="display: flex; flex-direction: column; gap: 12px;">
+                <button class="btn btn-secondary" id="btnLoadDemoData">
+                  &#x21BA; Reload Karachi University Benchmark Dataset (25 Projects)
+                </button>
+                <button class="btn btn-outline-danger" id="btnClearDataset">
+                  &#x1F5D1; Clear Current Dataset from Browser Memory
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </main>
+    </div>
+  </div>
+
+  <!-- =========================================================================
+       PROJECT DOSSIER MODAL (SECTION 11)
+       ========================================================================= -->
+  <div class="modal-overlay" id="projectDetailModal">
+    <div class="modal-container">
+      <div class="modal-header">
+        <h3>Project Intelligence Dossier</h3>
+        <button class="modal-close-btn" onclick="app.closeModal('projectDetailModal')">&times;</button>
+      </div>
+      <div class="modal-body" id="projectDetailBody">
+        <!-- Dynamically rendered -->
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="app.closeModal('projectDetailModal')">Close Dossier</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================================
+       SPECIALIZATION DETAIL MODAL (SECTIONS A-D)
+       ========================================================================= -->
+  <div class="modal-overlay" id="specDetailModal">
+    <div class="modal-container">
+      <div class="modal-header">
+        <h3>Specialization Market Intelligence (Sections A–D)</h3>
+        <button class="modal-close-btn" onclick="app.closeModal('specDetailModal')">&times;</button>
+      </div>
+      <div class="modal-body" id="specDetailModalContent">
+        <!-- Dynamically rendered -->
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="app.closeModal('specDetailModal')">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================================================================
+       TOAST NOTIFICATIONS CONTAINER
+       ========================================================================= -->
+  <div class="toast-container" id="toastContainer"></div>
+
+  <!-- =========================================================================
+       SCRIPTS ARCHITECTURE
+       ========================================================================= -->
+  <script src="js/data/karachiIndustryTaxonomy.js"></script>
+  <script src="js/data/subjectTaxonomy.js"></script>
+  <script src="js/data/sampleProjects.js"></script>
+
+  <script src="js/modules/excelProcessor.js"></script>
+  <script src="js/modules/scoringEngine.js"></script>
+  <script src="js/modules/intelligenceEngine.js"></script>
+  <script src="js/modules/oricPipeline.js"></script>
+  <script src="js/modules/chartsManager.js"></script>
+  <script src="js/modules/exportManager.js"></script>
+  <script src="js/modules/aiIntegration.js"></script>
+
+  <script src="js/app.js"></script>
+</body>
+</html>
